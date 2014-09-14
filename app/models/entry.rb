@@ -13,24 +13,29 @@ class Entry < ActiveRecord::Base
   def self.import(file)
     Entry.delete_all
     CSV.foreach(file.path, headers: true) do |row|
-      Entry.create!(row.to_hash)
+      entry = Entry.create!(row.to_hash)
+      entry.accrue!
     end
   end
 
-  def accrue
+  def accrue!
+    self.accruals = [0] * 12
+    start_month = self.maint_start.month
+    end_month = self.maint_end.month
 
-  end
+    months_late = self.date.month - start_month
+    start_month += months_late if months_late > 0
 
-  def calc_first_month
-
-  end
-
-  def calculate_monthly
-    num_months = self.maint_end.month - self.maint_start.month
+    num_months = end_month - start_month
     monthly = self.amount_paid / num_months
-    (self.maint_start.month..self.maint_end.month).each do |month|
+
+    self.accruals[start_month] = monthly * (months_late + 1)
+
+    (start_month + 1..self.maint_end.month).each do |month|
       self.accruals[month] = monthly
     end
+
+    self.save!
   end
 
 end

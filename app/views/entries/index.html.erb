@@ -1,31 +1,31 @@
 <%= form_tag '/accrual_year' do %>
-  <%= text_field_tag "Year to Accrue", Time.new.year %>
-  <%= submit_tag "Update Year", class: "btn btn-default" %>
+<%= text_field_tag "Year to Accrue", Time.new.year %>
+<%= submit_tag "Update Year", class: "btn btn-default" %>
 <% end %>
 
 <table class="table">
-  <th>Date</th>
-  <th>Invoice Number</th>
-  <th>Customer Name</th>
-  <th>Maintenance Start</th>
-  <th>Maintenance End</th>
-  <th>Amount Paid</th>
-  <th>Jan</th>
-  <th>Feb</th>
-  <th>Mar</th>
-  <th>Apr</th>
-  <th>May</th>
-  <th>Jun</th>
-  <th>Jul</th>
-  <th>Aug</th>
-  <th>Sep</th>
-  <th>Oct</th>
-  <th>Nov</th>
-  <th>Dec</th>
-
-
-
-  <% @entries.each do | entry | %>
+  <thead>
+    <th>Date</th>
+    <th>Invoice Number</th>
+    <th>Customer Name</th>
+    <th>Maintenance Start</th>
+    <th>Maintenance End</th>
+    <th>Amount Paid</th>
+    <th>Jan</th>
+    <th>Feb</th>
+    <th>Mar</th>
+    <th>Apr</th>
+    <th>May</th>
+    <th>Jun</th>
+    <th>Jul</th>
+    <th>Aug</th>
+    <th>Sep</th>
+    <th>Oct</th>
+    <th>Nov</th>
+    <th>Dec</th>
+  </thead>
+  <tbody>
+    <% @entries.each do | entry | %>
     <tr>
       <td><%= entry.date %></td>
       <td><%= entry.invoice_number %></td>
@@ -34,8 +34,23 @@
       <td><%= entry.maint_end %></td>
       <td><%= entry.amount_paid %></td>
 
+      <% unless entry.accruals.nil? %>
+      <td><%= entry.accruals[1] || 0%></td>
+      <td><%= entry.accruals[2] || 0%></td>
+      <td><%= entry.accruals[3] || 0%></td>
+      <td><%= entry.accruals[4] || 0%></td>
+      <td><%= entry.accruals[5] || 0%></td>
+      <td><%= entry.accruals[6] || 0%></td>
+      <td><%= entry.accruals[7] || 0%></td>
+      <td><%= entry.accruals[8] || 0%></td>
+      <td><%= entry.accruals[9] || 0%></td>
+      <td><%= entry.accruals[10] || 0 %></td>
+      <td><%= entry.accruals[11] || 0%></td>
+      <% end %>
+
     </tr>
-  <% end %>
+    <% end %>
+  </tbody>
 </table>
 
 <p><%= link_to "Download CSV", entries_url(format: "csv"), class: "btn btn-info"%></p>
@@ -43,12 +58,12 @@
 <h2>Import Entries</h2>
 
 <%= form_tag import_entries_url, multipart: true do %>
-  <table>
-    <tr>
-      <td><%= file_field_tag :file, class: "btn btn-default" %></td>
-      <td><%= submit_tag "Import", class: "btn btn-info" %></td>
-    </tr>
-  </table>
+<table>
+  <tr>
+    <td><%= file_field_tag :file, class: "btn btn-default" %></td>
+    <td><%= submit_tag "Import", class: "btn btn-info" %></td>
+  </tr>
+</table>
 <% end %>
 
 <br />
