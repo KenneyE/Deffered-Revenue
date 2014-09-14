@@ -5,5 +5,5 @@ Rails.application.routes.draw do
     collection {delete :clear}
   end
 
-  post '/accrual_year', to: 'entries#accrual_year'
+  post '/accrue', to: 'entries#accrue'
 end

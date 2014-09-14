@@ -1,8 +1,3 @@
-<%= form_tag '/accrual_year' do %>
-<%= text_field_tag "Year to Accrue", Time.new.year %>
-<%= submit_tag "Update Year", class: "btn btn-default" %>
-<% end %>
-
 <table class="table">
   <thead>
     <th>Date</th>
@@ -35,6 +30,7 @@
       <td><%= entry.amount_paid %></td>
 
       <% unless entry.accruals.nil? %>
+      <td><%= entry.accruals[0] || 0%></td>
       <td><%= entry.accruals[1] || 0%></td>
       <td><%= entry.accruals[2] || 0%></td>
       <td><%= entry.accruals[3] || 0%></td>
@@ -64,6 +60,13 @@
     <td><%= submit_tag "Import", class: "btn btn-info" %></td>
   </tr>
 </table>
+<% end %>
+
+<h2>Accrue</h2>
+<%= form_tag '/accrue' do %>
+  <%= label_tag "Year to Accrue" %>
+  <%= text_field_tag "accrual_year", Time.new.year %>
+  <%= submit_tag "Accrue", class: "btn btn-info" %>
 <% end %>
 
 <br />

@@ -18,4 +18,9 @@ class EntriesController < ApplicationController
     Entry.delete_all
     redirect_to root_url
   end
+
+  def accrue
+    Entry.accrue!(params[:accrual_year])
+    redirect_to root_url
+  end
 end
