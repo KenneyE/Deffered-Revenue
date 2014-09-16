@@ -19,6 +19,10 @@ class Entry < ActiveRecord::Base
 
   def self.accrue!(year)
     Entry.all.each do |entry|
+
+      if self.maint_start.year < year
+        entry.calc_prev_year
+      end
       entry.accruals = [0] * 12
       start_month = entry.maint_start.month
       end_month = entry.maint_end.month
@@ -35,8 +39,19 @@ class Entry < ActiveRecord::Base
         entry.accruals[month] = monthly
       end
 
+      entry.accrual_total = entry.accruals.sum
+
       entry.save!
     end
+  end
+
+  def calc_monthly
+    self.amount_paid / self.period
+  end
+
+  def calc_prev_year(monthly)
+    num_months_into_prev_year = 13 - self.maint_start.month
+    self.prev_accrual_total = num_months_into_prev_year * monthly
   end
 
 end
