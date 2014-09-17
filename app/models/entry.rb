@@ -19,39 +19,52 @@ class Entry < ActiveRecord::Base
 
   def self.accrue!(year)
     Entry.all.each do |entry|
-
-      if self.maint_start.year < year
-        entry.calc_prev_year
-      end
       entry.accruals = [0] * 12
-      start_month = entry.maint_start.month
-      end_month = entry.maint_end.month
 
-      months_late = entry.date.month - start_month
-      start_month += months_late if months_late > 0
+      start_date = entry.maint_start > entry.date ? entry.maint_start : entry.date
+      end_month = entry.maint_end.year > year ? 12 : entry.maint_end.month
 
-      num_months = end_month - start_month
-      monthly = entry.amount_paid / num_months
-
-      entry.accruals[start_month] = monthly * (months_late + 1)
-
-      (start_month + 1..entry.maint_end.month).each do |month|
-        entry.accruals[month] = monthly
+      monthly = entry.amount_paid / entry.period
+      if start_date.year < year
+        entry.calc_prev_year(monthly, year)
+        start_date = Date.new(year, 1, 1)
+      elsif start_date.year == year
+        (start_date.month - 1...end_month).each do |month|
+          entry.accruals[month] = monthly
+        end
+        if entry.date.month > entry.maint_start.month
+          entry.accruals[start_date.month - 1] = monthly * (entry.date.month - entry.maint_start.month + 1)
+        end
       end
+
+      # start_month = entry.maint_start.month
+      # end_month = entry.maint_end.month
+      #
+      # months_late = entry.date.month - start_month
+      # start_month += months_late if months_late > 0
+      #
+      # num_months = end_month - start_month
+      # monthly = entry.amount_paid / num_months
+      #
+      # entry.accruals[start_month] = monthly * (months_late + 1)
+      #
+      # (start_month + 1..entry.maint_end.month).each do |month|
+      #   entry.accruals[month] = monthly
+      # end
 
       entry.accrual_total = entry.accruals.sum
+      #
+      # if start_month < year
+      #   entry.calc_prev_year(monthly, year)
+      # end
 
       entry.save!
     end
   end
 
-  def calc_monthly
-    self.amount_paid / self.period
-  end
-
-  def calc_prev_year(monthly)
-    num_months_into_prev_year = 13 - self.maint_start.month
-    self.prev_accrual_total = num_months_into_prev_year * monthly
+  def calc_prev_year(monthly, year)
+    num_months_prev = (year * 12 + 1) - (self.maint_start.year * 12 + self.maint_start.month)
+    self.prev_accrual_total = num_months_prev * monthly
   end
 
 end
