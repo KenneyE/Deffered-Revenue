@@ -37,26 +37,7 @@ class Entry < ActiveRecord::Base
         end
       end
 
-      # start_month = entry.maint_start.month
-      # end_month = entry.maint_end.month
-      #
-      # months_late = entry.date.month - start_month
-      # start_month += months_late if months_late > 0
-      #
-      # num_months = end_month - start_month
-      # monthly = entry.amount_paid / num_months
-      #
-      # entry.accruals[start_month] = monthly * (months_late + 1)
-      #
-      # (start_month + 1..entry.maint_end.month).each do |month|
-      #   entry.accruals[month] = monthly
-      # end
-
       entry.accrual_total = entry.accruals.sum
-      #
-      # if start_month < year
-      #   entry.calc_prev_year(monthly, year)
-      # end
 
       entry.save!
     end
