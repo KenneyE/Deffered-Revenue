@@ -1,5 +1,6 @@
 class Entry < ActiveRecord::Base
 
+  before_save :calculate_end_date
 
   def self.to_csv(options = {})
     CSV.generate(options) do |csv|
@@ -37,6 +38,7 @@ class Entry < ActiveRecord::Base
         end
       end
 
+      entry.calc_next_year(monthly, year)
       entry.accrual_total = entry.accruals.sum
 
       entry.save!
@@ -47,5 +49,21 @@ class Entry < ActiveRecord::Base
     num_months_prev = (year * 12 + 1) - (self.maint_start.year * 12 + self.maint_start.month)
     self.prev_accrual_total = num_months_prev * monthly
   end
+
+  def calc_next_year(monthly, year)
+    if self.maint_end.year > year
+      months_diff = (12 * self.maint_end.year + self.maint_end.month - 12 * year + 12)
+      self.next_accrual_total = monthly * months_diff
+    else
+      self.next_accrual_total = 0
+    end
+  end
+
+  private
+
+  def calculate_end_date
+    self.maint_end = self.maint_start.advance(months: period)
+  end
+
 
 end

@@ -7,7 +7,8 @@
     <th>Customer Name</th>
     <th>Maintenance Start</th>
     <th>Maintenance End</th>
-    <th>Amount Paid</th>
+    <th>Invoiced</th>
+    <th>Previous Year</th>
     <th>Jan</th>
     <th>Feb</th>
     <th>Mar</th>
@@ -20,6 +21,7 @@
     <th>Oct</th>
     <th>Nov</th>
     <th>Dec</th>
+    <th>Following Year</th>
   </thead>
   <tbody>
     <% @entries.each do | entry | %>
@@ -30,7 +32,7 @@
       <td><%= entry.maint_start %></td>
       <td><%= entry.maint_end %></td>
       <td><%= entry.amount_paid %></td>
-
+      <td><%= entry.prev_accrual_total %></td>
       <% unless entry.accruals.nil? %>
       <td><%= entry.accruals[0] || 0%></td>
       <td><%= entry.accruals[1] || 0%></td>
@@ -45,6 +47,7 @@
       <td><%= entry.accruals[10] || 0 %></td>
       <td><%= entry.accruals[11] || 0%></td>
       <% end %>
+      <td><%= entry.next_accrual_total %></td>
 
     </tr>
     <% end %>
