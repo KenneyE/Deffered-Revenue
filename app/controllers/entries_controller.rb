@@ -9,6 +9,7 @@ class EntriesController < ApplicationController
   end
 
   def import
+    Entry.delete_all
     Entry.import(params[:file])
     flash[:notice] = ["Entries imported"]
     redirect_to root_url

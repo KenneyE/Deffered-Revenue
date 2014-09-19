@@ -22,21 +22,31 @@ class Entry < ActiveRecord::Base
     Entry.all.each do |entry|
       entry.accruals = [0] * 12
 
-      start_date = entry.maint_start > entry.date ? entry.maint_start : entry.date
-      end_month = entry.maint_end.year > year ? 12 : entry.maint_end.month
+      if entry.maint_start < entry.date
+        start_date = entry.date
+        months_late = (12 * entry.date.year + entry.date.month) - (12 * entry.maint_start.year + entry.maint_start.month)
+      else
+        start_date = entry.maint_start
+        months_late = 0
+      end
+      entry_date = entry.maint_start.advance(month: entry.period - 1)
+      end_month = entry_date.month > 12 ? 12 : entry_date.month
 
       monthly = entry.amount_paid / entry.period
       if start_date.year < year
-        entry.calc_prev_year(monthly, year)
+        num_months_prev = (year * 12 + 1) - (start_date.year * 12 + start_date.month)
+        entry.prev_accrual_total = num_months_prev * monthly
         start_date = Date.new(year, 1, 1)
-      elsif start_date.year == year
-        (start_date.month - 1...end_month).each do |month|
-          entry.accruals[month] = monthly
-        end
-        if entry.date.month > entry.maint_start.month
-          entry.accruals[start_date.month - 1] = monthly * (entry.date.month - entry.maint_start.month + 1)
-        end
       end
+
+      (start_date.month - 1...end_month).each do |month|
+        entry.accruals[month] = monthly
+      end
+
+      unless months_late.zero?
+        entry.accruals[start_date.month - 1] = monthly * months_late
+      end
+
 
       entry.calc_next_year(monthly, year)
       entry.accrual_total = entry.accruals.sum
@@ -62,8 +72,6 @@ class Entry < ActiveRecord::Base
   private
 
   def calculate_end_date
-    self.maint_end = self.maint_start.advance(months: period)
+    self.maint_end = self.maint_start.advance(months: self.period)
   end
-
-
 end
