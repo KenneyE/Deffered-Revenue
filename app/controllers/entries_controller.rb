@@ -21,7 +21,7 @@ class EntriesController < ApplicationController
   end
 
   def accrue
-    Entry.accrue!(params[:accrual_year].to_i)
+    Entry.accrue_all!(params[:accrual_year].to_i)
     redirect_to root_url
   end
 end
