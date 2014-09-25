@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140917032451) do
+ActiveRecord::Schema.define(version: 20140925034230) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -25,11 +25,12 @@ ActiveRecord::Schema.define(version: 20140917032451) do
     t.decimal  "amount_paid"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.text     "accruals",           array: true
+    t.text     "accruals",                           array: true
     t.decimal  "prev_accrual_total"
     t.decimal  "accrual_total"
     t.decimal  "next_accrual_total"
     t.integer  "period"
+    t.boolean  "issue_flag",         default: false
   end
 
 end

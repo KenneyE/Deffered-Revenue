@@ -37,25 +37,21 @@ class Entry < ActiveRecord::Base
     "next_accrual_total"
   ]
 
+
   before_save :calculate_end_date
+  # before_save :verify_presence_of_attributes
+  # validates :date, :amount_paid, :maint_start, :period, presence: true
 
   def self.to_csv(options = {})
     CSV.generate(options) do |csv|
 
-      COLUMN_NAMES.each do |name|
-        csv << name
-      end
+      csv << COLUMN_NAMES
 
       all.each do |entry|
-        EXPORT_COLUMNS.each do |col|
-          if col == "accruals"
-            entry.accruals.each do |month|
-              csv << month
-            end
-          else
-            csv << entry.attributes.values_at(col)
-          end
-        end
+        new_line = entry.attributes.values_at(*EXPORT_COLUMNS[0..6]) +
+        entry.accruals +
+        entry.attributes.values_at(*EXPORT_COLUMNS[8..9])
+        csv << new_line
       end
     end
   end
@@ -63,7 +59,18 @@ class Entry < ActiveRecord::Base
   def self.import(file)
     Entry.delete_all
     CSV.foreach(file.path, headers: true) do |row|
-      entry = Entry.create!(row.to_hash)
+      hashed_row = row.to_hash
+      entry = Entry.new(hashed_row)
+
+      if hashed_row["date"] && hashed_row["maint_start"] && hashed_row["amount_paid"]
+        entry.date = Date.strptime(hashed_row["date"], '%m/%d/%Y')
+        entry.maint_start = Date.strptime(hashed_row["maint_start"], '%m/%d/%y')
+        entry.amount_paid = hashed_row["amount_paid"].delete("$\,")
+      else
+        entry.issue_flag = true
+      end
+
+      entry.save
     end
   end
 
@@ -133,5 +140,12 @@ class Entry < ActiveRecord::Base
 
   def calculate_end_date
     self.maint_end = self.maint_start.advance(months: self.period - 1)
+  end
+
+  def verify_presence_of_attributes
+    self.issue_flag = self.date &&
+    self.maint_start &&
+    self.period &&
+    self.amount_paid
   end
 end

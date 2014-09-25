@@ -1,3 +1,4 @@
+<% issue_flag = false %>
 <h1>Deferred Revenue Schedule</h1>
 
 <p><%= link_to "Download CSV", entries_url(format: "csv"), class: "btn btn-info"%></p>
@@ -9,6 +10,7 @@
   <tr>
     <td><%= file_field_tag :file, class: "btn btn-default" %></td>
     <td><%= submit_tag "Import", class: "btn btn-info" %></td>
+    <% if issue_flag %><td class="flagged">Errors In Data Reported!</td><% end %>
   </tr>
 </table>
 <% end %>
@@ -50,7 +52,13 @@
   </thead>
   <tbody>
     <% @entries.each do | entry | %>
-    <tr>
+    <% if entry.issue_flag %>
+      <% flag_class = "flagged"; issue_flag = true %>
+    <% else %>
+      <% flag_class = "unflagged" %>
+    <% end %>
+
+    <tr class="<%= flag_class %>">
       <td><%= entry.date %></td>
       <td><%= entry.invoice_number %></td>
       <td><%= entry.customer_name %></td>
